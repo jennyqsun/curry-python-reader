@@ -6,6 +6,20 @@ import tkinter as tk
 from tkinter import filedialog
 import matplotlib.pyplot as plt
 
+
+'''
+this code is modified by Jenny Sun 05/27/22 from the original Neuroscan code  loadcurry()
+
+Record of Revisions
+
+Date            Programmers                         Descriptions of Change
+====         ================                       ======================
+05/27/22      Jenny Sun                             revised the impedance matrix that used to render an error
+                                                    haven't crosschecked with the matlab loadcurry() so use the matrix
+                                                     with caution!
+01/24/23      Jenny Sun 			      changed impedance matrix np.asarray(impedancelist, dtype = 								np.float) to float due to numpy new version>1.24.0
+'''
+
 def read(inputfilename='', plotdata = 1, verbosity = 2):
     """Curry Reader Help
 
@@ -190,20 +204,22 @@ def read(inputfilename='', plotdata = 1, verbosity = 2):
     tixstart = contents.find('\n',tixstart)
     tixstop = contents.find('IMPEDANCE_VALUES END_LIST')
     
-    impedancelist = [] 
-    
+    impedancelist = []
+
     if tixstart != -1 and tixstop != 1 :
         text = contents[tixstart:tixstop - 1].split()
-        for imp in text:
-           if int(imp) != -1:                   # skip?
-               impedancelist.append(float(imp))
-    
+        # for imp in text:
+        #    if int(float(imp)) != -1:                   # skip?
+        #        impedancelist.append(float(imp))
+        ######### above
+
+        impedancelist = text[0:nChannels]
         # Curry records last 10 impedances
-        impedancematrix = np.asarray(impedancelist, dtype = np.float).reshape(int(len(impedancelist) / nChannels), nChannels)
-    
+        impedancematrix = np.asarray(impedancelist, dtype = float).reshape(int(len(impedancelist) / nChannels), nChannels)
+    #
     if impedancematrix.any():
         log.info('Found impedance matrix')
-    
+
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     # open label file
     if extension == 'dat':
